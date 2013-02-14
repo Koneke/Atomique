@@ -10,6 +10,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Random;
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
@@ -89,16 +90,17 @@ public class AtomGame {
 			velocity = Math.floor(velocity*10)/10;
 			if(velocity > deadzone) { CE.rotation=aimangle; }
 
-			if(acontrollers[0].getValue("z") >= .7f) {
+			if(acontrollers[0].getValue("z") >= .3f) {
 				Entity b = new Entity(
 					new Rectangle(
 						CE.getRectangle().X-16,
 						CE.getRectangle().Y-16,
 						4, 4));
 				b.setSprite(Sprite.getSprite("res/bullet.png"));
-				b.rotation = CE.rotation-Math.PI;
+				Random random = new Random();
+				b.rotation = CE.rotation-Math.PI+Math.toRadians(-2+4*random.nextFloat());
 				b.update = f( 
-					double speed = .8;
+					double speed = .2;
 					CE.getRectangle().X+=Math.cos(CE.rotation)*speed*Time.dt;	
 					CE.getRectangle().Y+=Math.sin(CE.rotation)*speed*Time.dt;	
 					if(CE.getRectangle().X > ScrW || CE.getRectangle().X < 0 ||

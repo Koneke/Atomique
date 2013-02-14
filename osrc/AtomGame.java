@@ -7,6 +7,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Random;
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
@@ -54,7 +55,7 @@ public class AtomGame {
   e.setSprite(Sprite.getSprite("res/testship.png"));
   e.getRectangle().X = ScrW/2;
   e.getRectangle().Y = ScrH/2;
-  e.update = new fptr(){public void call(){double angle = Math.atan2( acontrollers[0].getValue("y"), acontrollers[0].getValue("x")); double velocity = Math.sqrt( Math.pow(acontrollers[0].getValue("x"),2)+ Math.pow(acontrollers[0].getValue("y"),2)); velocity = Math.floor(velocity*10)/10; double deadzone = .2; if(velocity <= deadzone) { velocity = 0f; } CE.getRectangle().X+=Math.cos(angle)*.4*Time.dt*velocity; CE.getRectangle().Y+=Math.sin(angle)*.4*Time.dt*velocity; double aimangle = Math.PI+Math.atan2( acontrollers[0].getValue("ry"), acontrollers[0].getValue("rx")); velocity = Math.sqrt( Math.pow(acontrollers[0].getValue("rx"),2)+ Math.pow(acontrollers[0].getValue("ry"),2)); velocity = Math.floor(velocity*10)/10; if(velocity > deadzone) { CE.rotation=aimangle; } if(acontrollers[0].getValue("z") >= .7f) { Entity b = new Entity( new Rectangle( CE.getRectangle().X-16, CE.getRectangle().Y-16, 4, 4)); b.setSprite(Sprite.getSprite("res/bullet.png")); b.rotation = CE.rotation-Math.PI; b.update = new fptr(){public void call(){double speed = .8; CE.getRectangle().X+=Math.cos(CE.rotation)*speed*Time.dt; CE.getRectangle().Y+=Math.sin(CE.rotation)*speed*Time.dt; if(CE.getRectangle().X > ScrW || CE.getRectangle().X < 0 || CE.getRectangle().Y > ScrH || CE.getRectangle().Y < 0) { modifiedEntities.remove(CE); System.out.println("killed"); }}}; modifiedEntities.add(b); System.out.print("foo"); }}};
+  e.update = new fptr(){public void call(){double angle = Math.atan2( acontrollers[0].getValue("y"), acontrollers[0].getValue("x")); double velocity = Math.sqrt( Math.pow(acontrollers[0].getValue("x"),2)+ Math.pow(acontrollers[0].getValue("y"),2)); velocity = Math.floor(velocity*10)/10; double deadzone = .2; if(velocity <= deadzone) { velocity = 0f; } CE.getRectangle().X+=Math.cos(angle)*.4*Time.dt*velocity; CE.getRectangle().Y+=Math.sin(angle)*.4*Time.dt*velocity; double aimangle = Math.PI+Math.atan2( acontrollers[0].getValue("ry"), acontrollers[0].getValue("rx")); velocity = Math.sqrt( Math.pow(acontrollers[0].getValue("rx"),2)+ Math.pow(acontrollers[0].getValue("ry"),2)); velocity = Math.floor(velocity*10)/10; if(velocity > deadzone) { CE.rotation=aimangle; } if(acontrollers[0].getValue("z") >= .3f) { Entity b = new Entity( new Rectangle( CE.getRectangle().X-16, CE.getRectangle().Y-16, 4, 4)); b.setSprite(Sprite.getSprite("res/bullet.png")); Random random = new Random(); b.rotation = CE.rotation-Math.PI+Math.toRadians(-2+4*random.nextFloat()); b.update = new fptr(){public void call(){double speed = .2; CE.getRectangle().X+=Math.cos(CE.rotation)*speed*Time.dt; CE.getRectangle().Y+=Math.sin(CE.rotation)*speed*Time.dt; if(CE.getRectangle().X > ScrW || CE.getRectangle().X < 0 || CE.getRectangle().Y > ScrH || CE.getRectangle().Y < 0) { modifiedEntities.remove(CE); }}}; modifiedEntities.add(b); }}};
   e.setCentered(true);
   entities.add(e);
  }
