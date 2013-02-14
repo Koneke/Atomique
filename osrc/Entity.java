@@ -1,5 +1,6 @@
 package lh.koneke.games.Atomique;
 import java.util.HashMap;
+import org.newdawn.slick.Color;
 public class Entity {
  Sprite s;
  public void setSprite(Sprite s) {
@@ -20,6 +21,8 @@ public class Entity {
  public Rectangle getRectangle() {
   return this.rectangle;
  }
+ public Entity(String name) {
+  this(name, new Rectangle(0,0,32,32)); }
  public Entity(String name, Rectangle r) {
   draw = new fptr(){public void call(){}};
   update = new fptr(){public void call(){}};
@@ -27,14 +30,8 @@ public class Entity {
   killed = false;
   this.name = name;
   vars = new HashMap<String, Double>();
- }
- public Entity(String name) {
-  draw = new fptr(){public void call(){}};
-  update = new fptr(){public void call(){}};
-  rectangle = new Rectangle(0,0,32,32);
-  killed = false;
-  this.name = name;
-  vars = new HashMap<String, Double>();
+  this.color = Color.white;
+  this.scale = 1f;
  }
  public Entity clone() {
   Entity e = new Entity(this.name);
@@ -77,4 +74,13 @@ public class Entity {
   return 0;
  }
  public void setVar(String s, double d) { vars.put(s, d); }
+ float depth;
+ public float getDepth() { return this.depth; }
+ public void setDepth(float d) { this.depth = d; }
+ Color color;
+ public Color getColor() { return this.color; }
+ public void setColor(Color c) { this.color = c; }
+ float scale;
+ public float getScale() { return this.scale; }
+ public void setScale(float f) { this.scale = f; }
 }

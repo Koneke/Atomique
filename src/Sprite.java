@@ -8,6 +8,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 import java.util.Map;
 import java.util.HashMap;
+import org.newdawn.slick.Color;
 
 public class Sprite {
 	Texture texture;
@@ -16,35 +17,50 @@ public class Sprite {
 		this.texture = texture;
 	}
 
-	public void draw(Rectangle area) { draw(area, false, 0); }
-	public void draw(Rectangle area, boolean centered) { draw(area, centered, 0); }
+	public void draw(Rectangle area) {
+		draw(area, false, 0);
+	}
+	public void draw(
+		Rectangle area, boolean centered) { draw(area, centered, 0);
+	}
 	public void draw(Rectangle area, boolean centered, Vector2 lookat) {
-		draw(area, centered, Math.atan2((centered?-(area.H/2):0)+area.Y-lookat.Y,(centered?-(area.W/2):0)+area.X-lookat.X));
+		draw(
+			area, centered,
+			Math.atan2(
+				(centered?-(area.H/2):0)+area.Y-lookat.Y,
+				(centered?-(area.W/2):0)+area.X-lookat.X),
+			Color.white);
 	}
 
 	public void draw(Rectangle area, boolean centered, double rotation) {
-		//double rotation = Math.atan2((centered?-(area.H/2):0)+area.Y-lookat.Y,(centered?-(area.W/2):0)+area.X-lookat.X);
-		
+		draw(area, centered, rotation, Color.white);
+	}
+	public void draw(Rectangle area, boolean centered, double rotation, Color c) {
+		draw(area, centered, rotation, c, 1f);
+	}
+	public void draw(Rectangle area, boolean centered, double rotation, Color c, float scale) {
 		texture.bind();
+		c.bind();
 		float dx, dy;
 		GL11.glBegin(GL11.GL_QUADS);
 		dx = -area.W/2; dy = -area.H/2;
 		GL11.glTexCoord2f(0,0);GL11.glVertex2f(
-			(centered ? -(area.W/2):0)+area.X-dx*(float)Math.cos(rotation)+dy*(float)Math.sin(rotation),
-			(centered ?- (area.H/2):0)+area.Y-dx*(float)Math.sin(rotation)-dy*(float)Math.cos(rotation));
+			(centered ? -(area.W/2):0)+area.X-dx*scale*(float)Math.cos(rotation)+dy*scale*(float)Math.sin(rotation),
+			(centered ?- (area.H/2):0)+area.Y-dx*scale*(float)Math.sin(rotation)-dy*scale*(float)Math.cos(rotation));
 		dx = area.W/2; dy = -area.H/2;
 		GL11.glTexCoord2f(1,0);GL11.glVertex2f(
-			(centered ? -(area.W/2):0)+area.X-dx*(float)Math.cos(rotation)+dy*(float)Math.sin(rotation),
-			(centered ?- (area.H/2):0)+area.Y-dx*(float)Math.sin(rotation)-dy*(float)Math.cos(rotation));
+			(centered ? -(area.W/2):0)+area.X-dx*scale*(float)Math.cos(rotation)+dy*scale*(float)Math.sin(rotation),
+			(centered ?- (area.H/2):0)+area.Y-dx*scale*(float)Math.sin(rotation)-dy*scale*(float)Math.cos(rotation));
 		dx = area.W/2; dy = area.H/2;
 		GL11.glTexCoord2f(1,1);GL11.glVertex2f(
-			(centered ? -(area.W/2):0)+area.X-dx*(float)Math.cos(rotation)+dy*(float)Math.sin(rotation),
-			(centered ?- (area.H/2):0)+area.Y-dx*(float)Math.sin(rotation)-dy*(float)Math.cos(rotation));
+			(centered ? -(area.W/2):0)+area.X-dx*scale*(float)Math.cos(rotation)+dy*scale*(float)Math.sin(rotation),
+			(centered ?- (area.H/2):0)+area.Y-dx*scale*(float)Math.sin(rotation)-dy*scale*(float)Math.cos(rotation));
 		dx = -area.W/2; dy = area.H/2;
 		GL11.glTexCoord2f(0,1);GL11.glVertex2f(
-			(centered ? -(area.W/2):0)+area.X-dx*(float)Math.cos(rotation)+dy*(float)Math.sin(rotation),
-			(centered ?- (area.H/2):0)+area.Y-dx*(float)Math.sin(rotation)-dy*(float)Math.cos(rotation));
+			(centered ? -(area.W/2):0)+area.X-dx*scale*(float)Math.cos(rotation)+dy*scale*(float)Math.sin(rotation),
+			(centered ?- (area.H/2):0)+area.Y-dx*scale*(float)Math.sin(rotation)-dy*scale*(float)Math.cos(rotation));
 		GL11.glEnd();
+		Color.white.bind();
 	}	
 	
 	static HashMap<String, Sprite> sprites = new HashMap<String, Sprite>();

@@ -11,6 +11,8 @@ import org.lwjgl.input.Mouse;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Collections;
+import java.util.Comparator;
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
@@ -19,6 +21,7 @@ import net.java.games.input.ControllerEnvironment;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 import net.java.games.input.Version;
+import org.newdawn.slick.Color;
 
 public class AtomGame {
 
@@ -99,6 +102,7 @@ public class AtomGame {
 						CE.getRectangle().X-16,
 						CE.getRectangle().Y-16,
 						4, 4));
+				b.setDepth(1);
 				b.setSprite(Sprite.getSprite("res/bullet.png"));
 				b.rotation = CE.rotation-Math.PI+Math.toRadians(-2+4*random.nextFloat());
 				b.update = f( 
@@ -139,12 +143,28 @@ public class AtomGame {
 		particlePrototype.getRectangle().H = 4;
 		particlePrototype.setCentered(true);
 		particlePrototype.setVar("lifetime", 400); 
+		particlePrototype.setVar("life", 0); 
+		particlePrototype.setVar("alphafadethres", 300); 
 		particlePrototype.setVar("speed", .5); //pix/msec	  
+		particlePrototype.setVar("friction", .0005);
+		particlePrototype.setVar("anglerotationdir",Math.round(random.nextFloat()));
+		particlePrototype.setVar("anglerotationspeed", Math.toRadians(.6));
 		particlePrototype.update = f(
-			CE.setVar("lifetime", CE.getVar("lifetime")-Time.dt);
-			if(CE.getVar("lifetime") <= 0) {
-				modifiedEntities.remove(CE); }
+			//CE.setVar("lifetime", CE.getVar("lifetime")-Time.dt);
+			double life = CE.getVar("life")+Time.dt;
+			CE.setVar("life", life);
 
+			if(CE.getVar("life") >= CE.getVar("lifetime")) {
+				modifiedEntities.remove(CE); }
+			
+			double thres = CE.getVar("alphafadethres");
+			double lifet = CE.getVar("lifetime");
+			if(life > thres) {
+				//CE.color.a = 1f-(float)((lifet-life)/(lifet-thres));	
+				//flickers everything for some reason, wtf?
+			}
+
+			CE.setVar("speed", CE.getVar("speed")-CE.getVar("friction")*Time.dt);
 			CE.getRectangle().X += Math.cos(CE.rotation)*CE.getVar("speed")*Time.dt;
 			CE.getRectangle().Y += Math.sin(CE.rotation)*CE.getVar("speed")*Time.dt;
 			if(
@@ -155,6 +175,8 @@ public class AtomGame {
 			) {
 				modifiedEntities.remove(CE);
 			}
+			
+			CE.rotation += CE.getVar("anglerotationdir")*CE.getVar("anglerotationspeed");
 		);	
 
 		final Entity enemyPrototype;	
@@ -164,6 +186,8 @@ public class AtomGame {
 		enemyPrototype.getRectangle().Y = ScrH/2;
 		enemyPrototype.setCentered(true);
 		enemyPrototype.setVar("hp", 40);
+		enemyPrototype.setVar("enginetrailfreq", 3);
+		enemyPrototype.setVar("enginetrailtime", 0);
 		enemyPrototype.update = f(
 			double speed = .3;
 			double angle = Math.atan2(player.getRectangle().Y-CE.getRectangle().Y,
@@ -171,6 +195,26 @@ public class AtomGame {
 			CE.rotation = angle+Math.PI;
 			CE.getRectangle().X+=Math.cos(angle)*Time.dt*speed;
 			CE.getRectangle().Y+=Math.sin(angle)*Time.dt*speed;
+
+			CE.setVar("enginetrailtime", CE.getVar("enginetrailtime")+Time.dt);
+			while(CE.getVar("enginetrailtime") > CE.getVar("enginetrailfreq")) {
+				CE.setVar("enginetrailtime", CE.getVar("enginetrailtime")-CE.getVar("enginetrailfreq"));
+				Entity enginetrail = particlePrototype.clone();
+				enginetrail.setSprite(Sprite.getSprite("res/generic.png"));
+				enginetrail.setVar("lifetime", 150);
+				enginetrail.rotation = CE.rotation+Math.toRadians(-40+80*random.nextFloat());
+				enginetrail.getRectangle().X = CE.getRectangle().X-CE.getRectangle().W/2;
+				enginetrail.getRectangle().Y = CE.getRectangle().Y-CE.getRectangle().H/2;
+				enginetrail.setColor(new Color(
+					255,255,255));
+				enginetrail.setVar("anglerotationdir", 0);
+				enginetrail.setVar("speed", .35);
+				enginetrail.setVar("speed", enginetrail.getVar("speed")*random.nextFloat());
+				enginetrail.setVar("lifetime", enginetrail.getVar("lifetime")*(.8+.5*random.nextFloat()));
+				enginetrail.scale = 2f;
+				enginetrail.draw = f(CE.color.b-=0.01*Time.dt;CE.color.g-=0.005*Time.dt;);
+				modifiedEntities.add(enginetrail);
+			}
 
 			for(Entity x : entities) {
 				if(!x.name.equals("bullet")) { continue; }
@@ -192,6 +236,13 @@ public class AtomGame {
 					b.rotation = Math.PI*2*random.nextFloat();
 					b.getRectangle().X = CE.getRectangle().X;
 					b.getRectangle().Y = CE.getRectangle().Y;
+					b.setColor(new Color(
+						random.nextFloat(),
+						random.nextFloat(),
+						random.nextFloat()));
+					b.setVar("anglerotationdir", Math.round(random.nextFloat()));
+					b.setVar("speed", b.getVar("speed")*random.nextFloat());
+					b.setVar("lifetime", b.getVar("lifetime")*(.8+.5*random.nextFloat()));
 					modifiedEntities.add(b);
 
 					CE.setVar("hp", CE.getVar("hp")-1);
@@ -203,7 +254,7 @@ public class AtomGame {
 
 		e = new Entity("spawner");
 		e.setSprite(null);
-		e.setVar("freq", 250);
+		e.setVar("freq", 325);
 		e.setVar("timer", e.getVar("freq"));
 		e.update = f(
 			CE.setVar("timer", CE.getVar("timer")-Time.dt);
@@ -241,12 +292,25 @@ public class AtomGame {
 			GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glColor3f(1f,1f,1f);
 
-		for(Entity e : entities) {
-			CE = e;
-			if(e.getSprite() != null) {
-				e.getSprite().draw(e.getRectangle(),e.getCentered(),e.getRotation());
+		List<Entity> drawlist = new ArrayList<Entity>(entities);
+		Collections.sort(drawlist, new Comparator<Entity>() {
+			public int compare(Entity a, Entity b) {
+				if(a.getDepth() < b.getDepth()) { return -1; }
+				if(a.getDepth() > b.getDepth()) { return 1; }
+				return 0;
 			}
+		});
+		Collections.reverse(drawlist);		
+
+		//for(Entity e : entities) {
+		for(Entity e : drawlist) {
+			CE = e;
 			e.draw.call();
+			//CE.color.a = 1f;
+			if(e.getSprite() != null) {
+				e.getSprite().draw(
+					e.getRectangle(),e.getCentered(),e.getRotation(),e.getColor(),e.getScale());
+			}
 		}
 
 		Display.update();
