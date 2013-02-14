@@ -12,11 +12,13 @@ import net.java.games.input.Version;
 public class AtomController {
  static int uidc = 0;
  HashMap<String, Float> components;
+ HashMap<String, Float> lastpoll;
  int uid;
  String name;
  Controller controller;
  public AtomController(String name) {
   components = new HashMap<String, Float>();
+  lastpoll = new HashMap<String, Float>(components);
   this.uid = uidc;
   uidc = uidc + 1;
   this.name = name;
@@ -25,13 +27,9 @@ public class AtomController {
  public String getName() { return name; }
  public float getValue(String comp) {
   if(!components.keySet().contains(comp)) {
-   components.put(comp, 0f);
-  }
-  return components.get(comp);
- }
- public void setValue(String comp, float value) {
-  components.put(comp, value);
- }
+   components.put(comp, 0f); }
+  return components.get(comp); }
+ public void setValue(String comp, float value) { components.put(comp, value); }
  public void setController(Controller c) { this.controller = c; }
  public void update() {
   controller.poll();
@@ -41,4 +39,10 @@ public class AtomController {
    setValue(event.getComponent().getName(), event.getValue());
   }
  }
+ public void postupdate() {
+  lastpoll = new HashMap<String, Float>(components); }
+ public float getLast(String comp) {
+  if(!lastpoll.keySet().contains(comp)) {
+   lastpoll.put(comp, 0f); }
+  return lastpoll.get(comp); }
 }

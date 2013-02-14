@@ -15,14 +15,14 @@ public class AtomController {
 	static int uidc = 0;
 
 	HashMap<String, Float> components;
-	//List<String> updated; //list of components updated since last poll
+	HashMap<String, Float> lastpoll;
 	int uid;
 	String name;
 	Controller controller;
 
 	public AtomController(String name) {
 		components = new HashMap<String, Float>();
-		//updated = new ArrayList<String>();
+		lastpoll = new HashMap<String, Float>(components);
 		this.uid = uidc;
 		uidc = uidc + 1;
 		this.name = name;
@@ -33,16 +33,9 @@ public class AtomController {
 
 	public float getValue(String comp) {
 		if(!components.keySet().contains(comp)) {
-			components.put(comp, 0f);
-		}
-		return components.get(comp);
-	}
-	public void setValue(String comp, float value) {
-		components.put(comp, value);
-		//if(!updated.contains(comp) && Math.abs(pre-value) > dead) {
-		//	updated.add(comp);
-		//}
-	}
+			components.put(comp, 0f); }
+		return components.get(comp); }
+	public void setValue(String comp, float value) { components.put(comp, value); }
 	
 	public void setController(Controller c) { this.controller = c; }
 	public void update() {
@@ -53,10 +46,12 @@ public class AtomController {
 			setValue(event.getComponent().getName(), event.getValue());
 		}
 	}
-	
-//	public List<String> poll() {
-//		List<String> old = new ArrayList<String>(updated);
-//		updated.clear();
-//		return old;
-//	}
+
+	public void postupdate() {
+		lastpoll = new HashMap<String, Float>(components); }
+
+	public float getLast(String comp) {
+		if(!lastpoll.keySet().contains(comp)) {
+			lastpoll.put(comp, 0f); }
+		return lastpoll.get(comp); }
 }

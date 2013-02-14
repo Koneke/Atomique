@@ -32,6 +32,7 @@ public class AtomGame {
 	ControllerEnvironment controllerEnvironment;
 	Controller[] controllers;
 	AtomController[] acontrollers;
+	Entity player;
 	
 	public void setup() {
 		try {
@@ -63,7 +64,9 @@ public class AtomGame {
 	}
 
 	public void init() {
-		Entity e = new Entity();
+		final Random random = new Random();
+
+		Entity e = new Entity("player");
 		e.setSprite(Sprite.getSprite("res/testship.png"));
 		e.getRectangle().X = ScrW/2;
 		e.getRectangle().Y = ScrH/2;
@@ -91,41 +94,145 @@ public class AtomGame {
 			if(velocity > deadzone) { CE.rotation=aimangle; }
 
 			if(acontrollers[0].getValue("z") >= .3f) {
-				Entity b = new Entity(
+				Entity b = new Entity("bullet",
 					new Rectangle(
 						CE.getRectangle().X-16,
 						CE.getRectangle().Y-16,
 						4, 4));
 				b.setSprite(Sprite.getSprite("res/bullet.png"));
-				Random random = new Random();
 				b.rotation = CE.rotation-Math.PI+Math.toRadians(-2+4*random.nextFloat());
 				b.update = f( 
-					double speed = .2;
+					double speed = .7;
 					CE.getRectangle().X+=Math.cos(CE.rotation)*speed*Time.dt;	
 					CE.getRectangle().Y+=Math.sin(CE.rotation)*speed*Time.dt;	
-					if(CE.getRectangle().X > ScrW || CE.getRectangle().X < 0 ||
-						CE.getRectangle().Y > ScrH || CE.getRectangle().Y < 0) {
+					if(
+						(CE.getRectangle().X > ScrW && Math.cos(CE.rotation) > 0) ||
+						(CE.getRectangle().X < 0 && Math.cos(CE.rotation) < 0) ||
+						(CE.getRectangle().Y > ScrH && Math.sin(CE.rotation) > 0) ||
+						(CE.getRectangle().Y < 0 && Math.sin(CE.rotation) < 0)
+					) {
 						modifiedEntities.remove(CE);
 					}
 				);
 				modifiedEntities.add(b);	
 			}
+			
+			if(acontrollers[0].getValue("A") == 1.0f && acontrollers[0].getLast("A") < 1.0f) {
+				Entity b = new Entity("vortex",
+					new Rectangle(
+						CE.getRectangle().X,
+						CE.getRectangle().Y,
+						32,32));
+				b.setSprite(Sprite.getSprite("res/vortex.png"));
+				b.setCentered(true);
+				modifiedEntities.add(b);
+			}
 		);
 		e.setCentered(true);
+		player = e;
+		entities.add(e);
+		
+		final Entity particlePrototype;
+		particlePrototype = new Entity("particle");
+		particlePrototype.setSprite(Sprite.getSprite("res/flare.png"));
+		particlePrototype.getRectangle().W = 4;
+		particlePrototype.getRectangle().H = 4;
+		particlePrototype.setCentered(true);
+		particlePrototype.setVar("lifetime", 400); 
+		particlePrototype.setVar("speed", .5); //pix/msec	  
+		particlePrototype.update = f(
+			CE.setVar("lifetime", CE.getVar("lifetime")-Time.dt);
+			if(CE.getVar("lifetime") <= 0) {
+				modifiedEntities.remove(CE); }
+
+			CE.getRectangle().X += Math.cos(CE.rotation)*CE.getVar("speed")*Time.dt;
+			CE.getRectangle().Y += Math.sin(CE.rotation)*CE.getVar("speed")*Time.dt;
+			if(
+				(CE.getRectangle().X > ScrW && Math.cos(CE.rotation) > 0) ||
+				(CE.getRectangle().X < 0 && Math.cos(CE.rotation) < 0) ||
+				(CE.getRectangle().Y > ScrH && Math.sin(CE.rotation) > 0) ||
+				(CE.getRectangle().Y < 0 && Math.sin(CE.rotation) < 0)
+			) {
+				modifiedEntities.remove(CE);
+			}
+		);	
+
+		final Entity enemyPrototype;	
+		enemyPrototype = new Entity("enemy");
+		enemyPrototype.setSprite(Sprite.getSprite("res/testship2.png"));
+		enemyPrototype.getRectangle().X = 400;
+		enemyPrototype.getRectangle().Y = ScrH/2;
+		enemyPrototype.setCentered(true);
+		enemyPrototype.setVar("hp", 40);
+		enemyPrototype.update = f(
+			double speed = .3;
+			double angle = Math.atan2(player.getRectangle().Y-CE.getRectangle().Y,
+				player.getRectangle().X-CE.getRectangle().X);	
+			CE.rotation = angle+Math.PI;
+			CE.getRectangle().X+=Math.cos(angle)*Time.dt*speed;
+			CE.getRectangle().Y+=Math.sin(angle)*Time.dt*speed;
+
+			for(Entity x : entities) {
+				if(!x.name.equals("bullet")) { continue; }
+				if(!modifiedEntities.contains(x)) { continue; }
+				Rectangle area = CE.getRectangle();
+				boolean centered = CE.getCentered();
+				float x1 = (centered ? -(area.W/2):0)+area.X-area.W/2;
+				float x2 = (centered ? -(area.W/2):0)+area.X+area.W/2;
+				float y1 = (centered ? -(area.H/2):0)+area.Y-area.H/2;
+				float y2 = (centered ? -(area.H/2):0)+area.Y+area.H/2;
+				float ex = x.getRectangle().X;
+				float ey = x.getRectangle().Y;
+				if(
+					ex > x1 && ex < x2 && ey > y1 && ey < y2	
+				) {
+					modifiedEntities.remove(x);
+
+					Entity b = particlePrototype.clone();
+					b.rotation = Math.PI*2*random.nextFloat();
+					b.getRectangle().X = CE.getRectangle().X;
+					b.getRectangle().Y = CE.getRectangle().Y;
+					modifiedEntities.add(b);
+
+					CE.setVar("hp", CE.getVar("hp")-1);
+					if(CE.getVar("hp") <= 0) {
+						modifiedEntities.remove(CE); }
+				}
+			}
+		);
+
+		e = new Entity("spawner");
+		e.setSprite(null);
+		e.setVar("freq", 250);
+		e.setVar("timer", e.getVar("freq"));
+		e.update = f(
+			CE.setVar("timer", CE.getVar("timer")-Time.dt);
+			if(CE.getVar("timer") <= 0) {
+				CE.setVar("timer", CE.getVar("timer")+CE.getVar("freq"));
+				Entity b = enemyPrototype.clone();
+				b.getRectangle().X = 640*Math.round(random.nextFloat());
+				b.getRectangle().Y = 460*random.nextFloat();
+				modifiedEntities.add(b);	
+			}
+		);
 		entities.add(e);
 	}
 
 	public void update() {
 		Time.update();
+
 		for(int i = 0;i<acontrollers.length;i++) {
-			acontrollers[i].update();
-		}
+			acontrollers[i].update(); }
+
 		modifiedEntities = new ArrayList<Entity>(entities);
 		for(Entity e : entities) {
 			CE = e;
 			e.update.call();
 		}
 		entities = new ArrayList<Entity>(modifiedEntities);
+
+		for(int i = 0;i<acontrollers.length;i++) {
+			acontrollers[i].postupdate(); }
 	}
 
 	public void draw() {
@@ -136,7 +243,9 @@ public class AtomGame {
 
 		for(Entity e : entities) {
 			CE = e;
-			e.getSprite().draw(e.getRectangle(),e.getCentered(),e.getRotation());
+			if(e.getSprite() != null) {
+				e.getSprite().draw(e.getRectangle(),e.getCentered(),e.getRotation());
+			}
 			e.draw.call();
 		}
 

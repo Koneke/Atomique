@@ -1,6 +1,8 @@
 #include "../head"
 package lh.koneke.games.Atomique;
 
+import java.util.HashMap;
+
 public class Entity {
 	Sprite s;
 	public void setSprite(Sprite s) {
@@ -25,17 +27,38 @@ public class Entity {
 		return this.rectangle;
 	}
 
-	public Entity(Rectangle r) {
+	public Entity(String name, Rectangle r) {
 		draw = f();
 		update = f();
 		rectangle = r;
 		killed = false;
+		this.name = name;
+		vars = new HashMap<String, Double>();
 	}
-	public Entity() {
+	public Entity(String name) {
 		draw = f();
 		update = f();
 		rectangle = new Rectangle(0,0,32,32);
 		killed = false;
+		this.name = name;
+		vars = new HashMap<String, Double>();
+	}
+	public Entity clone() {
+		Entity e = new Entity(this.name);
+		e.setSprite(getSprite());
+		e.setCentered(getCentered());
+		e.draw = draw;
+		e.update = update;
+		e.setRectangle(new Rectangle(
+			getRectangle().X,
+			getRectangle().Y,
+			getRectangle().W,
+			getRectangle().H
+		));
+		e.vars = new HashMap<String, Double>(vars);
+		e.rotation = rotation;
+		e.killed = killed;
+		return e;
 	}
 
 	double rotation = 0;
@@ -45,4 +68,25 @@ public class Entity {
 	boolean killed;
 	public boolean getKilled() { return killed; }
 	public void kill() { killed = true; }
+
+	String name;
+	//uid?
+
+	HashMap<String, Double> vars;
+	public double getVar(String s) {
+	try {
+	return vars.get(s); }
+	catch (Exception e) {
+			println(name);
+			println(s);
+			for(String ss : vars.keySet())
+			{
+				print(ss+" ");
+				println(vars.get(ss));
+			}
+		}
+		System.exit(0);
+		return 0;
+	}
+	public void setVar(String s, double d) { vars.put(s, d); }
 }
