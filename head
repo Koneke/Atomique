@@ -1,0 +1,6 @@
+#ifndef __SRCHEAD__
+#define print(x) System.out.print(x)
+#define println(x) System.out.println(x)
+#define f(x) new fptr(){public void call(){x}}
+#define __SRCHEAD__
+#endif

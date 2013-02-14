@@ -1,0 +1,1 @@
+java -cp bin:lib/jinput.jar:lib/jinput-test.jar:lib/slick.jar:lib/lwjgl/lwjgl.jar: -Djava.library.path=./native/linux $1

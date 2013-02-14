@@ -1,0 +1,1 @@
+javac -d bin -sourcepath osrc -classpath lib/jinput.jar:lib/jinput-test.jar:lib/lwjgl/lwjgl.jar:lib/slick.jar osrc/*

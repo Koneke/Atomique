@@ -1,0 +1,1 @@
+ls -CF1 src | grep '[^/]$' | xargs -I {} cpp -P src/{} osrc/{}
