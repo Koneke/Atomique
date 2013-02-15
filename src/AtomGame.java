@@ -73,6 +73,9 @@ public class AtomGame {
 		e.setSprite(Sprite.getSprite("res/testship.png"));
 		e.getRectangle().X = ScrW/2;
 		e.getRectangle().Y = ScrH/2;
+		e.color = new Color(255f,255f,255f,255f);
+		e.setVar("gunfreq", 1);
+		e.setVar("guntime", 0);
 		e.update = f(
 			double angle = Math.atan2(
 				acontrollers[0].getValue("y"),
@@ -97,6 +100,10 @@ public class AtomGame {
 			if(velocity > deadzone) { CE.rotation=aimangle; }
 
 			if(acontrollers[0].getValue("z") >= .3f) {
+				CE.setVar("guntime", CE.getVar("guntime")+Time.dt);
+				while(CE.getVar("guntime") > CE.getVar("gunfreq")) {
+					CE.setVar("guntime", CE.getVar("guntime")-CE.getVar("gunfreq"));	
+				
 				Entity b = new Entity("bullet",
 					new Rectangle(
 						CE.getRectangle().X-16,
@@ -105,6 +112,7 @@ public class AtomGame {
 				b.setDepth(1);
 				b.setSprite(Sprite.getSprite("res/bullet.png"));
 				b.rotation = CE.rotation-Math.PI+Math.toRadians(-2+4*random.nextFloat());
+				b.color = new Color(255f,255f,255f,255f);
 				b.update = f( 
 					double speed = .7;
 					CE.getRectangle().X+=Math.cos(CE.rotation)*speed*Time.dt;	
@@ -119,6 +127,8 @@ public class AtomGame {
 					}
 				);
 				modifiedEntities.add(b);	
+			}} else {
+				CE.setVar("guntime", 0);
 			}
 			
 			if(acontrollers[0].getValue("A") == 1.0f && acontrollers[0].getLast("A") < 1.0f) {
@@ -188,6 +198,7 @@ public class AtomGame {
 		enemyPrototype.setVar("hp", 40);
 		enemyPrototype.setVar("enginetrailfreq", 3);
 		enemyPrototype.setVar("enginetrailtime", 0);
+		enemyPrototype.color = new Color(255f,255f,255f,255f);
 		enemyPrototype.update = f(
 			double speed = .3;
 			double angle = Math.atan2(player.getRectangle().Y-CE.getRectangle().Y,
@@ -212,8 +223,16 @@ public class AtomGame {
 				enginetrail.setVar("speed", enginetrail.getVar("speed")*random.nextFloat());
 				enginetrail.setVar("lifetime", enginetrail.getVar("lifetime")*(.8+.5*random.nextFloat()));
 				enginetrail.scale = 2f;
-				enginetrail.draw = f(CE.color.b-=0.01*Time.dt;CE.color.g-=0.005*Time.dt;);
+				enginetrail.draw = f(
+					CE.color.b-=0.01*Time.dt;CE.color.g-=0.005*Time.dt;
+					CE.setScale(1f-(float)(CE.getVar("life")/CE.getVar("lifetime")));
+				);
+				Entity enginetrailcopy = enginetrail.clone();
+				enginetrailcopy.rotation = CE.rotation+Math.toRadians(-40+80*random.nextFloat()); 
+				enginetrailcopy.setVar("speed", enginetrail.getVar("speed")*random.nextFloat());
+				enginetrailcopy.setVar("lifetime", enginetrail.getVar("lifetime")*(.8+.5*random.nextFloat()));
 				modifiedEntities.add(enginetrail);
+				modifiedEntities.add(enginetrailcopy);
 			}
 
 			for(Entity x : entities) {

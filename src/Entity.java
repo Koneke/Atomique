@@ -56,6 +56,9 @@ public class Entity {
 		e.vars = new HashMap<String, Double>(vars);
 		e.rotation = rotation;
 		e.killed = killed;
+		e.depth = depth;
+		e.color = color;
+		e.scale = scale;
 		return e;
 	}
 
