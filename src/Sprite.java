@@ -82,4 +82,7 @@ public class Sprite {
 			return sprites.get(path);
 		}
 	}
+	public Vector2 getSize() {
+		return new Vector2(texture.getTextureWidth(), texture.getTextureHeight());
+	}
 }

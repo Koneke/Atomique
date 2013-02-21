@@ -49,7 +49,7 @@ public class Entity {
   e.rotation = rotation;
   e.killed = killed;
   e.depth = depth;
-  e.color = color;
+  e.color = new Color(color);
   e.scale = scale;
   return e;
  }

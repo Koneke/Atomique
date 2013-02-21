@@ -1,3 +1,4 @@
+#include "../head"
 package lh.koneke.games.Atomique;
 
 import java.util.HashMap;
@@ -38,12 +39,13 @@ public class AtomController {
 	public void setValue(String comp, float value) { components.put(comp, value); }
 	
 	public void setController(Controller c) { this.controller = c; }
+	public Controller getController() { return this.controller; }
 	public void update() {
 		controller.poll();
 		EventQueue q = controller.getEventQueue();
 		Event event = new Event();
 		while(q.getNextEvent(event)) {
-			setValue(event.getComponent().getName(), event.getValue());
+			setValue(event.getComponent().getIdentifier().toString(), event.getValue());
 		}
 	}
 

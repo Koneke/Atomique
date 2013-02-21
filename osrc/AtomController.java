@@ -31,12 +31,13 @@ public class AtomController {
   return components.get(comp); }
  public void setValue(String comp, float value) { components.put(comp, value); }
  public void setController(Controller c) { this.controller = c; }
+ public Controller getController() { return this.controller; }
  public void update() {
   controller.poll();
   EventQueue q = controller.getEventQueue();
   Event event = new Event();
   while(q.getNextEvent(event)) {
-   setValue(event.getComponent().getName(), event.getValue());
+   setValue(event.getComponent().getIdentifier().toString(), event.getValue());
   }
  }
  public void postupdate() {

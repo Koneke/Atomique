@@ -15,4 +15,8 @@ public class Rectangle {
 	public float centerY() {
 		return Y+H/2;
 	}
+	public void setSize(Vector2 size) {
+		this.W = size.X;
+		this.H = size.Y;
+	}
 }
